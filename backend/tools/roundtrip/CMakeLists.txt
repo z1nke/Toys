@@ -1,14 +1,14 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8)
 
-PROJECT(roundtrip CXX)
+project(roundtrip CXX)
 
-ADD_COMPILE_OPTIONS(-g)
-ADD_COMPILE_OPTIONS(-Wall)
-ADD_COMPILE_OPTIONS(-Werror)
+add_compile_options(-g)
+add_compile_options(-Wall)
+add_compile_options(-Werror)
 
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNODEBUG")
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_CXX_FLAGS_DEBUG "-O0")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNODEBUG")
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
-ADD_EXECUTABLE(roundtrip roundtrip.cpp)
-TARGET_LINK_LIBRARIES(roundtrip pthread)
+add_executable(roundtrip roundtrip.cpp)
+target_link_libraries(roundtrip pthread)
