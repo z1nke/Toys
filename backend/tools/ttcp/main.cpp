@@ -2,22 +2,18 @@
 
 #include <cassert>
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
     Option opt;
-    if (!parseCommandLine(argc, argv, opt))
-    {
+    if (!parseCommandLine(argc, argv, opt)) {
         return 1;
     }
 
-    if (opt.transmit)
-    {
+    if (opt.transmit) {
         transmit(opt);
         return 0;
     }
-    
-    if (opt.receive)
-    {
+
+    if (opt.receive) {
         receive(opt);
         return 0;
     }
