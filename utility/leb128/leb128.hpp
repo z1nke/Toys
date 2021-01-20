@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-constexpr std::uint32_t encodeULEB128(std::uint64_t value, std::uint8_t *buf) {
-    std::uint8_t *org = buf;
+constexpr std::uint32_t encodeULEB128(std::uint64_t value, std::uint8_t* buf) {
+    std::uint8_t* org = buf;
     do {
         uint8_t byte = value & 0x7F; // low order 7 bits of value
         value >>= 7;
@@ -16,10 +16,10 @@ constexpr std::uint32_t encodeULEB128(std::uint64_t value, std::uint8_t *buf) {
     return static_cast<std::uint32_t>(buf - org);
 }
 
-constexpr std::uint64_t decodeULEB128(const std::uint8_t *buf,
-                                      std::uint32_t *count = nullptr,
-                                      const char **error = nullptr) {
-    const std::uint8_t *org = buf;
+constexpr std::uint64_t decodeULEB128(const std::uint8_t* buf,
+                                      std::uint32_t* count = nullptr,
+                                      const char** error = nullptr) {
+    const std::uint8_t* org = buf;
     std::uint64_t value = 0;
     std::uint32_t shift = 0;
     if (error) {
@@ -46,8 +46,8 @@ constexpr std::uint64_t decodeULEB128(const std::uint8_t *buf,
     return value;
 }
 
-constexpr std::uint32_t encodeSLEB128(std::int64_t value, std::uint8_t *buf) {
-    std::uint8_t *org = buf;
+constexpr std::uint32_t encodeSLEB128(std::int64_t value, std::uint8_t* buf) {
+    std::uint8_t* org = buf;
     bool more = true;
 
     while (more) {
@@ -70,10 +70,10 @@ constexpr std::uint32_t encodeSLEB128(std::int64_t value, std::uint8_t *buf) {
     return static_cast<std::uint32_t>(buf - org);
 }
 
-constexpr std::int64_t decodeSLEB128(std::uint8_t *buf,
-                                     std::uint32_t *count = nullptr,
-                                     const char **error = nullptr) {
-    const std::uint8_t *org = buf;
+constexpr std::int64_t decodeSLEB128(std::uint8_t* buf,
+                                     std::uint32_t* count = nullptr,
+                                     const char** error = nullptr) {
+    const std::uint8_t* org = buf;
     std::int64_t value = 0;
     std::uint32_t shift = 0;
     if (error) {

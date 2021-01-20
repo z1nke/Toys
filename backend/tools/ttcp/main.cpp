@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     Option opt;
     if (!parseCommandLine(argc, argv, opt)) {
         return 1;

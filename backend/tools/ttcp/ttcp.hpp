@@ -14,11 +14,12 @@ struct Option {
 
     Option()
         : port(0), length(0), number(0), transmit(false), receive(false),
-          nodelay(0) {}
+          nodelay(0) {
+    }
 };
 
-bool parseCommandLine(int argc, char **argv, Option &opt);
-struct sockaddr_in resolveOrDie(const char *host, std::uint16_t port);
+bool parseCommandLine(int argc, char** argv, Option& opt);
+struct sockaddr_in resolveOrDie(const char* host, std::uint16_t port);
 
 struct SessionMessage {
     std::int32_t number;
@@ -30,5 +31,5 @@ struct PayloadMessage {
     char data[0]; // flexible array
 };
 
-void transmit(const Option &opt);
-void receive(const Option &opt);
+void transmit(const Option& opt);
+void receive(const Option& opt);

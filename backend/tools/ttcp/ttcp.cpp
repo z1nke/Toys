@@ -18,19 +18,17 @@
 
 namespace po = boost::program_options;
 
-bool parseCommandLine(int argc, char **argv, Option &opt) {
+bool parseCommandLine(int argc, char** argv, Option& opt) {
     po::options_description desc{"Usage ./ttcp [option]"};
-    desc.add_options()
-        ("help,h", "help")
-        ("port,p", po::value<std::uint16_t>(&opt.port)->default_value(5000),
-         "tcp port")
-        ("length,l", po::value<std::int32_t>(&opt.length)->default_value(65536),
-         "buffer length")
-        ("number,n", po::value<std::int32_t>(&opt.number)->default_value(8192),
-         "number of buffers")
-        ("trans,t", po::value<std::string>(&opt.host), "transmit")
-        ("recv,r", "receive")
-        ("nodelay,D", "set TCP_NODELAY");
+    desc.add_options()("help,h", "help")(
+        "port,p", po::value<std::uint16_t>(&opt.port)->default_value(5000),
+        "tcp port")("length,l",
+                    po::value<std::int32_t>(&opt.length)->default_value(65536),
+                    "buffer length")(
+        "number,n", po::value<std::int32_t>(&opt.number)->default_value(8192),
+        "number of buffers")("trans,t", po::value<std::string>(&opt.host),
+                             "transmit")("recv,r", "receive")(
+        "nodelay,D", "set TCP_NODELAY");
 
     po::variables_map varmap;
     po::store(po::parse_command_line(argc, argv, desc), varmap);
@@ -61,7 +59,7 @@ bool parseCommandLine(int argc, char **argv, Option &opt) {
     return true;
 }
 
-struct sockaddr_in resolveOrDie(const char *host, std::uint16_t port) {
+struct sockaddr_in resolveOrDie(const char* host, std::uint16_t port) {
     // or struct hostent* host = ::gethostbyname(host);
     struct sockaddr_in addr;
     bzero(&addr, sizeof(addr));
@@ -88,7 +86,7 @@ int acceptOrDie(std::uint16_t port) {
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = INADDR_ANY;
 
-    if (::bind(listenfd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr))) {
+    if (::bind(listenfd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr))) {
         std::perror("bind");
         std::exit(1);
     }
@@ -103,7 +101,7 @@ int acceptOrDie(std::uint16_t port) {
     socklen_t addrlen = 0;
 
     int sockfd =
-        ::accept(listenfd, reinterpret_cast<sockaddr *>(&peerAddr), &addrlen);
+        ::accept(listenfd, reinterpret_cast<sockaddr*>(&peerAddr), &addrlen);
     if (sockfd < 0) {
         std::perror("accept");
         std::exit(1);
@@ -113,10 +111,10 @@ int acceptOrDie(std::uint16_t port) {
     return sockfd;
 }
 
-std::int32_t write_n(int sockfd, const void *buf, std::int32_t length) {
+std::int32_t write_n(int sockfd, const void* buf, std::int32_t length) {
     std::int32_t written = 0;
     while (written < length) {
-        ssize_t nw = ::write(sockfd, static_cast<const char *>(buf) + written,
+        ssize_t nw = ::write(sockfd, static_cast<const char*>(buf) + written,
                              length - written);
         if (nw > 0) {
             written += static_cast<std::int32_t>(nw);
@@ -131,11 +129,11 @@ std::int32_t write_n(int sockfd, const void *buf, std::int32_t length) {
     return written;
 }
 
-std::int32_t read_n(int sockfd, void *buf, std::int32_t length) {
+std::int32_t read_n(int sockfd, void* buf, std::int32_t length) {
     std::int32_t readn = 0;
     while (readn < length) {
         ssize_t nr =
-            ::read(sockfd, static_cast<char *>(buf) + readn, length - readn);
+            ::read(sockfd, static_cast<char*>(buf) + readn, length - readn);
         if (nr > 0) {
             readn += static_cast<std::int32_t>(nr);
         } else if (nr == 0) {
@@ -149,14 +147,14 @@ std::int32_t read_n(int sockfd, void *buf, std::int32_t length) {
     return readn;
 }
 
-void transmit(const Option &opt) {
+void transmit(const Option& opt) {
     sockaddr_in addr = resolveOrDie(opt.host.c_str(), opt.port);
     std::cout << "connecting to " << inet_ntoa(addr.sin_addr) << ":"
               << ntohs(addr.sin_port) << std::endl;
 
     int sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
     assert(sockfd >= 0);
-    if (::connect(sockfd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr))) {
+    if (::connect(sockfd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr))) {
         std::perror("socket");
         std::cout << "unable to connect " << opt.host << std::endl;
         ::close(sockfd);
@@ -166,7 +164,7 @@ void transmit(const Option &opt) {
     const int yes = 1;
     if (opt.nodelay) {
         ::setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY,
-                     static_cast<const void *>(&yes), sizeof(yes));
+                     static_cast<const void*>(&yes), sizeof(yes));
     }
 
     std::cout << "connected!" << std::endl;
@@ -183,7 +181,7 @@ void transmit(const Option &opt) {
     }
 
     const int totalLen = static_cast<int>(sizeof(int32_t) + opt.length);
-    PayloadMessage *payload = static_cast<PayloadMessage *>(::malloc(totalLen));
+    PayloadMessage* payload = static_cast<PayloadMessage*>(::malloc(totalLen));
     assert(payload);
     payload->length = htonl(opt.length);
     for (std::int32_t i = 0; i < opt.length; ++i) {
@@ -212,7 +210,7 @@ void transmit(const Option &opt) {
     printf("%.3f seconds\n%.3f MiB/s\n", elapsed, totalmb / elapsed);
 }
 
-void receive(const Option &opt) {
+void receive(const Option& opt) {
     int sockfd = acceptOrDie(opt.port);
     SessionMessage sessionMessage{0, 0};
     if (read_n(sockfd, &sessionMessage, sizeof(sessionMessage)) !=
@@ -227,7 +225,7 @@ void receive(const Option &opt) {
               << "receive length = " << sessionMessage.length << std::endl;
     const int totalLen =
         static_cast<int>(sizeof(std::int32_t) + sessionMessage.length);
-    PayloadMessage *payload = static_cast<PayloadMessage *>(::malloc(totalLen));
+    PayloadMessage* payload = static_cast<PayloadMessage*>(::malloc(totalLen));
     assert(payload);
 
     for (std::int32_t i = 0; i < sessionMessage.number; ++i) {

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "leb128.hpp"
-#include <cstring>
 #include <climits>
+#include <cstring>
 
 TEST(ULEB128, EncodeDecode) {
     // 0x04A3 -> 0x09A3(little endian)
@@ -24,7 +24,8 @@ TEST(ULEB128, EncodeDecode) {
     // boundary
     // U64_MAX -> 0x01FFFFFFFFFFFFFFFFFF(little endian)
     memset(buf, 16, sizeof(std::uint8_t));
-    EXPECT_EQ(10, encodeULEB128(std::numeric_limits<std::uint64_t>::max(), buf));
+    EXPECT_EQ(10,
+              encodeULEB128(std::numeric_limits<std::uint64_t>::max(), buf));
     EXPECT_EQ(0xFF, buf[0]);
     EXPECT_EQ(0xFF, buf[1]);
     EXPECT_EQ(0xFF, buf[2]);
