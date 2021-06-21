@@ -1,0 +1,22 @@
+message(STATUS ${PROJECT_BINARY_DIR})
+
+if (WIN32)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY 
+    ${PROJECT_BINARY_DIR}/lib
+  )
+  
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+    ${PROJECT_BINARY_DIR}/bin
+  )
+else (WIN32)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY 
+    ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib
+  )
+  
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+    ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin
+  )
+endif ()
+
+add_subdirectory(y64lib)
+add_subdirectory(tools)

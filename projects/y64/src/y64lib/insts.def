@@ -1,0 +1,57 @@
+#ifndef INST
+#define INST(NAME, ICODE, IFUN)
+#endif
+
+#ifndef INST_COND
+#define INST_COND(NAME, ICODE)
+#endif
+
+#ifndef COND
+#define COND(NAME, IFUN)
+#endif
+
+//   name       icode  ifun
+INST(halt,      0x0,   0)
+INST(nop,       0x1,   0)
+INST(rrmovq,    0x2,   0)
+INST(irmovq,    0x3,   0)
+INST(rmmovq,    0x4,   0)
+INST(mrmovq,    0x5,   0)
+INST(addq,      0x6,   0)
+INST(subq,      0x6,   1)
+INST(andq,      0x6,   2)
+INST(xorq,      0x6,   3)
+INST(jmp,       0x7,   0)
+INST(call,      0x8,   0)
+INST(ret,       0x9,   0)
+INST(pushq,     0xA,   0)
+INST(popq,      0xB,   0)
+
+// pseudo instruction
+INST(dot_pos,   0xC,   0)
+INST(dot_align, 0xC,   1)
+INST(dot_quad,  0xC,   2)
+
+//        name   icode
+INST_COND(cmov,  2)
+INST_COND(j,     7)
+
+//   name   ifun
+COND(le,    0x1)
+COND(l,     0x2)
+COND(e,     0x3)
+COND(ne,    0x4)
+COND(ge,    0x5)
+COND(g,     0x6)
+
+#ifdef INST
+#undef INST
+#endif
+
+#ifdef INST_COND
+#undef INST_COND
+#endif
+
+#ifdef COND
+#undef COND
+#endif
