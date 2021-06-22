@@ -60,12 +60,9 @@ void AsmParser::parseStatements() {
     case AsmToken::COMMENT:
       lexer.lex(); // eat comment
       break;
-    default: {
-      int line = lexer.getLine();
-      const AsmToken& token = lexer.lex();
-      parseError("%d: Unexpected token '%s'", line,
-            token.toString().c_str());
-    }
+    default:
+      parseError("%d: Unexpected token '%s'", lexer.getLine(),
+                 lexer.lex().toString().c_str());
     }
 
     nextKind = lexer.lookahead();

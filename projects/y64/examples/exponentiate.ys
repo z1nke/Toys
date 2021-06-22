@@ -1,0 +1,78 @@
+.pos 0
+init:
+    irmovq stack, %rbp
+    irmovq stack, %rsp
+    jmp main
+
+.pos 0x100
+stack:
+
+.pos 0x104
+
+# __fastcall int multiply (int x, int y)
+# x is passed in as %rcx, y is passed in as %rdx.
+multiply:
+    # Set up stack frame.
+    pushq %rbp
+    rrmovq %rsp, %rbp
+    pushq %rsi
+    
+    irmovq $-1, %rsi  # rsi = -1
+    xorq %rax, %rax   # rax = 0
+
+    # Skip multiply loop silently if multiplying by <= 0.
+    andq %rdx, %rdx
+    jle multiply_end
+
+multiply_loop:
+    addq %rcx, %rax   # rax += rcx
+    addq %rsi, %rdx   # rdx -= 1
+    jne multiply_loop # if (rdx != 0) goto multiply_loop
+
+multiply_end:
+    # Clean up stack frame.
+    popq %rsi
+    rrmovq %rbp, %rsp
+    popq %rbp
+    ret
+
+# _cdecl int pow (int base, int exp)
+pow:
+    # Set up stack frame.
+    pushq %rbp
+    rrmovq %rsp, %rbp
+    
+    irmovq $-1, %rsi      # rsi = -1
+    
+    # We'll use %rsi to demonstrate callee-save in multiply,
+    # since multiply uses the callee-save %rsi register.
+    mrmovq 16(%rbp), %rcx  # rcx = base
+    mrmovq 24(%rbp), %rdi # rdi = exp
+    
+    rrmovq %rcx, %rdx     # rdx = base
+    addq %rsi, %rdi       # rdi -= 1
+
+pow_loop:
+    pushq %rdx
+    call multiply         # rax = rcx * edx
+    popq %rdx
+    addq %rsi, %rdi       # rdi -= 1
+    rrmovq %rax, %rcx     # rcx = rax
+    jne pow_loop          # if (rdi != 0) goto pow_loop
+
+pow_end:
+    # Clean up stack frame.
+    rrmovq %rbp, %rsp
+    popq %rbp
+    ret
+
+main:
+    # rax = pow(3, 4)
+    irmovq $3, %rax # base
+    irmovq $4, %rbx # exponent
+    pushq %rbx
+    pushq %rax
+    call pow
+    rrmovq %rbp, %rsp
+
+    halt
