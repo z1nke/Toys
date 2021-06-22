@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 #include <experimental/filesystem> 
 namespace fs = std::experimental::filesystem;
 #else
-error "Missing the <filesystem> header."
+#error "Missing the <filesystem> header."
 #endif
 
 #include "../../y64lib/y64parser.hpp"

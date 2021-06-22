@@ -21,7 +21,7 @@ public:
 private:
   AsmLexer(const char* beginPtr, const char* endPtr) 
       : curPtr(beginPtr), tokenStart(beginPtr), endPtr(endPtr),
-        nextTokens(), line(1), col(1), isEat(false) {
+        nextTokens(), line(1), col(1), needEat(false) {
   }
 
   AsmToken lexToken();
@@ -44,7 +44,7 @@ private:
   std::vector<AsmToken> nextTokens;
   int line;
   int col;
-  bool isEat;
+  bool needEat;
 };
 
 } // namespace y64

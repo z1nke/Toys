@@ -17,26 +17,26 @@ void AsmLexer::advance(std::size_t n) {
 }
 
 AsmToken::Kind AsmLexer::lookahead() {
-  if (isEat && !nextTokens.empty()) {
+  if (needEat && !nextTokens.empty()) {
     nextTokens.pop_back();
   }
   if (nextTokens.empty()) {
     nextTokens.push_back(lexToken());
   }
 
-  isEat = false;
+  needEat = false;
   return nextTokens.back().getKind();
 }
 
 const AsmToken& AsmLexer::lex() {
-  if (isEat && !nextTokens.empty()) {
+  if (needEat && !nextTokens.empty()) {
     nextTokens.pop_back();
   }
   if (nextTokens.empty()) {
     nextTokens.push_back(lexToken());
   }
 
-  isEat = true;
+  needEat = true;
   return nextTokens.back();
 }
 

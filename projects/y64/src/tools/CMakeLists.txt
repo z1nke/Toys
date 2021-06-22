@@ -1,2 +1,2 @@
-add_subdirectory(YAS)
-add_subdirectory(YIS)
+add_subdirectory(yas)
+add_subdirectory(yis)

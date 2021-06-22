@@ -37,7 +37,7 @@ void runServer() {
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port = htons(PORT);
 
-    if (::bind(sockfd, reinterpret_cast<sockaddr *>(&servaddr),
+    if (::bind(sockfd, reinterpret_cast<sockaddr*>(&servaddr),
                sizeof(servaddr))) {
         std::perror("bind");
         std::exit(1);
@@ -48,12 +48,12 @@ void runServer() {
         socklen_t addrlen = sizeof(cliaddr);
         ssize_t nr =
             ::recvfrom(sockfd, &msg, sizeof(msg), 0,
-                       reinterpret_cast<sockaddr *>(&cliaddr), &addrlen);
+                       reinterpret_cast<sockaddr*>(&cliaddr), &addrlen);
         if (nr == sizeof(msg)) {
             msg.response = now();
             ssize_t nw =
                 ::sendto(sockfd, &msg, sizeof(msg), 0,
-                         reinterpret_cast<const sockaddr *>(&cliaddr), addrlen);
+                         reinterpret_cast<const sockaddr*>(&cliaddr), addrlen);
             if (nw < 0) {
                 std::perror("sendto message");
             } else if (nw != sizeof(msg)) {
@@ -69,7 +69,7 @@ void runServer() {
     }
 }
 
-void runClient(const char *host) {
+void runClient(const char* host) {
     int sockfd = ::socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
     struct sockaddr_in servaddr;
     bzero(&servaddr, sizeof(servaddr));
@@ -81,7 +81,7 @@ void runClient(const char *host) {
 
     // connection of udp
     // see <<unp>> 8.11
-    if (::connect(sockfd, reinterpret_cast<sockaddr *>(&servaddr),
+    if (::connect(sockfd, reinterpret_cast<sockaddr*>(&servaddr),
                   sizeof(servaddr))) {
         std::perror("connect");
         std::exit(1);
@@ -121,8 +121,8 @@ void runClient(const char *host) {
     }
 }
 
-int main(int argc, char **argv) {
-    const char *helpInfo =
+int main(int argc, char** argv) {
+    const char* helpInfo =
         "Usage ./roundtrip [option]:\n-s\tserver\nhost\tclient";
     if (argc != 2) {
         std::cout << helpInfo << std::endl;
