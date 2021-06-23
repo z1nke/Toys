@@ -8,7 +8,7 @@ public:
         total(total), prefix(std::move(prefix)), suffix(std::move(suffix)) { }
 
     void show(std::size_t progress) const {
-        // prefix: |    bar    | XXX.XX% suffix
+        // prefix: |    bar    | III.DD% suffix
         double percent = 100.0 * progress / total;
         std::size_t finishLen = 
             static_cast<std::size_t>(percent / 100.0 * kBarLen);
@@ -29,14 +29,12 @@ public:
         std::fflush(stdout);
 
         // clear stdout buffer
-        if (progress != total) {
-            std::string backspaceBuf(outLen, '\b');
-            printf("%s", backspaceBuf.c_str());
-        }
-    }
+        std::string backspaceBuf(outLen, '\b');
+        printf("%s", backspaceBuf.c_str());
 
-    ~ProgressBar() {
-        std::cout << std::endl;
+        if (progress == total) {
+            printf("\n");
+        }
     }
 
 private:
