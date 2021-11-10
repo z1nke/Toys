@@ -42,7 +42,7 @@ int Y64Machine::executeInstructions(const std::vector<Instruction>& insts) {
 }
 
 int Y64Machine::executeInstruction(const Instruction& inst) {
-  // TODO: implement me
+  // TODO: Implement me
   (void)inst;
 }
 
@@ -77,7 +77,7 @@ void printCharMemoryByte(std::uint8_t val) {
 }
 
 void Y64Machine::printMemory(std::uint64_t offset, std::uint64_t len) const {
-  // print memory space with 16 bytes per line
+  // Print memory space with 16 bytes per line
   static const std::uint64_t bytesPerLine = 16;
   std::cout << std::right << std::setw(10) << "offset" << ": ";
   for (int i = 0; i < bytesPerLine; ++i) {

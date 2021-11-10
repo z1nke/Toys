@@ -14,7 +14,8 @@ public:
       : lexer(source), curPos(0), out(), curAlign(8) { }
 
   // parse y86-64 assembly statements and
-  // write
+  // write output buffer and
+  // return all instructions
   std::vector<Instruction> parseStatements();
   void emit(std::ofstream& fout);
 
