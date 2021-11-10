@@ -35,7 +35,7 @@ public:
 
 
 public:
-  Instruction() 
+  Instruction()
       : value(), addr(0), line(), icode(), ifun(), regA(), regB(),
         isPseduo(), isPendingAddress(), hasAddr(false) { }
 

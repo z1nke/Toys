@@ -9,7 +9,7 @@ namespace y64 {
 
 class AsmLexer {
 public:
-  AsmLexer(const std::string& source) 
+  AsmLexer(const std::string& source)
       : AsmLexer(source.data(), source.data() + source.size()) { }
 
   AsmToken::Kind lookahead();
@@ -19,7 +19,7 @@ public:
   int getCol() const { return col; }
 
 private:
-  AsmLexer(const char* beginPtr, const char* endPtr) 
+  AsmLexer(const char* beginPtr, const char* endPtr)
       : curPtr(beginPtr), tokenStart(beginPtr), endPtr(endPtr),
         nextTokens(), line(1), col(1), needEat(false) {
   }

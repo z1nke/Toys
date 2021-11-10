@@ -7,8 +7,8 @@
 
 namespace y64 {
 
-std::string Register::name() {
-  switch (reg) {
+std::string Register::name() const {
+  switch (rid) {
 #define REGISTER(NAME, STR, ID) case ID: return #STR;
 #include "registers.def"
   default:
@@ -16,8 +16,8 @@ std::string Register::name() {
   }
 }
 
-static const std::unordered_map<std::string, Register::Reg> registersTable {
-#define REGISTER(NAME, STR, ID) { std::string(#STR), Register::Reg(ID) },
+static const std::unordered_map<std::string, Register::RID> registersTable {
+#define REGISTER(NAME, STR, ID) { std::string(#STR), Register::RID(ID) },
 #include "registers.def"
 };
 
@@ -37,11 +37,11 @@ Register Register::makeNone() {
 Register::Register(const std::string& name) {
   auto iter = registersTable.find(name);
   if (iter == registersTable.end()) {
-    reg = err;
+    rid = err;
     return;
   }
 
-  reg = iter->second;
+  rid = iter->second;
 }
 
 } // namespace y64

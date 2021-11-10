@@ -12,7 +12,7 @@ namespace {
 
 constexpr bool
 stringViewStartsWith(std::string_view sv, std::string_view str) {
-  return sv.size() >= str.size() && 
+  return sv.size() >= str.size() &&
       std::string_view::traits_type::compare(
           sv.data(), str.data(), str.size()) == 0;
 }
@@ -33,7 +33,7 @@ std::uint64_t AsmParser::pendingAddress = 1;
 // label := identifier:
 // instruction := inst operands
 // pseudo_instruction := pseudo_inst operands
-void AsmParser::parseStatements() {
+std::vector<Instruction> AsmParser::parseStatements() {
   AsmToken::Kind nextKind = lexer.lookahead();
 
   std::vector<Instruction> insts;
@@ -43,9 +43,11 @@ void AsmParser::parseStatements() {
     case AsmToken::TKEOF:
       calcPendingAddress(insts);
       genAllCode(insts);
-      return;
+      return insts;
     case AsmToken::ERROR:
       parseError("%d: Unknown token", lexer.getLine());
+      out.clear();
+      return {};
     case AsmToken::IDENTIFIER:
       parseLabel(insts);
       break;
@@ -63,10 +65,14 @@ void AsmParser::parseStatements() {
     default:
       parseError("%d: Unexpected token '%s'", lexer.getLine(),
                  lexer.lex().toString().c_str());
+      out.clear();
+      return {};
     }
 
     nextKind = lexer.lookahead();
   }
+
+  Y64_UNREACHABLE("Unknown parse error");
 }
 
 void AsmParser::calcPendingAddress(std::vector<Instruction>& insts) {
@@ -236,7 +242,7 @@ Instruction AsmParser::parseInstruction() {
     END_INSTRUCTION;
   }
 
-  parseError("%d: Unknown instruction '%s'", line, 
+  parseError("%d: Unknown instruction '%s'", line,
         std::string(instOpCode.data(), instOpCode.size()).c_str());
 }
 
@@ -265,7 +271,7 @@ Instruction AsmParser::parseDirective() {
 
     assertNextToken(AsmToken::NUMBER, line, false, ".align");
     AsmToken alignToken = lexer.lex();
-    
+
     std::int64_t alignValue = alignToken.getValue();
     if (alignValue != 1 && alignValue != 2 &&
         alignValue != 4 && alignValue != 8) {
@@ -277,15 +283,15 @@ Instruction AsmParser::parseDirective() {
 
     return inst;
   }
-  
+
   if (directiveToken.toStringRef() == ".quad"sv) {
     inst.setOpCode(Instruction::dot_quad);
     assertNextToken(AsmToken::NUMBER, line, false, ".quad");
     AsmToken quadToken = lexer.lex();
-    
+
     inst.value = quadToken.getValue();
     assertNextToken(AsmToken::ENDLINE, line, true);
-    
+
     std::uint64_t nextAddr = nextQuadAlignAddress();
     inst.setAddress(nextAddr);
     curPos = nextAddr + 8;
@@ -340,7 +346,7 @@ void AsmParser::parseLabel(std::vector<Instruction>& insts) {
       }
       break;
     }
-      
+
     case AsmToken::ENDLINE:
       Y64_FALLTHROUGH;
     case AsmToken::COMMENT:
@@ -425,7 +431,7 @@ void AsmParser::assertNextToken(AsmToken::Kind expectedKind, int line,
   if (consume) {
     lexer.lex();
   }
-  
+
   if (nextKind != expectedKind) {
     if (!before) {
       parseError("%d: Expect '%s' token", line,

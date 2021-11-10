@@ -17,5 +17,6 @@ add_library(y64 STATIC
   registers.def
   util.cpp
   y64lexer.cpp
+  y64machine.cpp
   y64parser.cpp
 )

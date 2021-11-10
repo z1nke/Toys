@@ -26,9 +26,9 @@ public:
   };
 
   AsmToken() : kind(ERROR), tokenStr(), value(0) { }
-  AsmToken(Kind kind, std::string_view str) 
+  AsmToken(Kind kind, std::string_view str)
       : kind(kind), tokenStr(str), value(0) { }
-  
+
   static AsmToken makeNumber(const char* start, std::size_t len,
                              std::int64_t val) {
     AsmToken token{ NUMBER, std::string_view{start, len} };

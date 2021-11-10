@@ -7,7 +7,7 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 #elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem> 
+#include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 #else
 #error "Missing the <filesystem> header."
@@ -32,7 +32,7 @@ bool readSource(const std::string& filename, std::string& source) {
     return false;
   }
 
-  source.assign(std::istreambuf_iterator<char>(input), 
+  source.assign(std::istreambuf_iterator<char>(input),
                 std::istreambuf_iterator<char>());
   input.close();
 

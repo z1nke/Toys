@@ -94,7 +94,7 @@ AsmToken AsmLexer::lexToken() {
 
     parseError("%d: Unexpected symbol near '%c'", line, curChar);
     break;
-  } 
+  }
 }
 
 char AsmLexer::getNextChar() {
@@ -172,7 +172,7 @@ AsmToken AsmLexer::lexDecOrHexNumber(int base, bool isNegative) {
   } catch (std::out_of_range&) {
     parseError("%d: Immediate '%s' is too large", line, numStr.c_str());
   }
-  
+
   return AsmToken::makeNumber(tokenStart, curPtr - tokenStart,
       static_cast<std::int64_t>(value));
 }
@@ -181,7 +181,7 @@ AsmToken AsmLexer::lexRegister() {
   AsmToken token = lexIdentifier(true);
   std::string identifier{ token.toStringRef().data(),
                           token.toStringRef().size() };
-  static const std::regex 
+  static const std::regex
       registerRegex{ "%rax|%rcx|%rdx|%rbx|%rsp|%rbp|%rsi|%rdi|"
                      "%r8|%r9|%r10|%r11|%r12|%r13|%r14" };
   bool isMatch = std::regex_match(identifier, registerRegex,
@@ -192,7 +192,7 @@ AsmToken AsmLexer::lexRegister() {
   }
 
   token.setKind(AsmToken::REGISTER);
-  
+
   return token;
 }
 
@@ -200,7 +200,7 @@ AsmToken AsmLexer::lexPseudoInst() {
   AsmToken token = lexIdentifier(true);
   std::string identifier{ token.toStringRef().data(),
                           token.toStringRef().size() };
-  static const std::regex 
+  static const std::regex
       pseudoRegex{ "\\.byte|\\.word|\\.long|\\.quad|\\.pos|\\.align" };
   bool isMatch = std::regex_match(identifier, pseudoRegex,
                                   std::regex_constants::match_continuous);
@@ -240,7 +240,7 @@ AsmToken AsmLexer::lexIdentifier(bool hasPrefix) {
   }
 
   // try to match instruction name
-  static const std::regex 
+  static const std::regex
       instRegex{"halt|nop|rrmovq|cmovle|cmovl|cmove|cmovne|"
                 "cmovge|cmovg|rmmovq|mrmovq|irmovq|addq|subq|"
                 "andq|xorq|jmp|jle|jl|je|jne|jge|jg|call|ret|"

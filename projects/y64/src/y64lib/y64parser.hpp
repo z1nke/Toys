@@ -10,10 +10,12 @@ namespace y64 {
 
 class AsmParser {
 public:
-  AsmParser(const std::string& source) 
+  AsmParser(const std::string& source)
       : lexer(source), curPos(0), out(), curAlign(8) { }
 
-  void parseStatements();
+  // parse y86-64 assembly statements and
+  // write
+  std::vector<Instruction> parseStatements();
   void emit(std::ofstream& fout);
 
 private:
