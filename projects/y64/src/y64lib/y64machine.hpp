@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 
+#include "buffer.hpp"
 #include "instruction.hpp"
 #include "register.hpp"
 
@@ -14,7 +15,7 @@ public:
   static const std::uint64_t kMemorySize = 0x2000;
   static const std::size_t kNumGeneralRegs = 15;
 
-  enum Stat {
+  enum Stat : std::uint8_t {
     AOK,
     HLT, // execute `halt` instruction
     ADR, // invalid address
@@ -23,11 +24,9 @@ public:
 
 public:
   Y64Machine() : mem(std::vector<std::uint8_t>(kMemorySize)),
-                 pc(0),
-                 zeroFlag(false),
-                 signedFlag(false),
-                 overflowFlag(false),
-                 stat(Stat::AOK) {
+                 pc(0), zeroFlag(false), signedFlag(false), overflowFlag(false),
+                 stat(Stat::AOK), valA(0), valB(0), valC(0), valE(0), valM(0),
+                 valP(0), rA(Register::makeNone()), rB(Register::makeNone()) {
     #define REGISTER(NAME, STR, ID) NAME = Register::make(ID);
     #include "registers.def"
 
@@ -35,10 +34,30 @@ public:
   }
 
 public:
+  // Load bytes buffer or file to memory
+  void load(const std::vector<std::uint8_t>& buffer);
+  void load(const std::string& filename);
+
+  // Fetch, decode, excute, memory, write back, update PC
+  // See https://w3.cs.jmu.edu/lam2mo/cs261_2018_08/files/y86-isa.pdf
+  void fetch();
+  void decode();
+  void execute();
+  void accessMemory();
+  void writeBack();
+  void updatePC();
+
+private:
+  #define INST(NAME, ICODE, IFUN) int NAME##Exec(const Instruction& inst);
+  #include "insts.def"
+
   // Return 0 on success. On error, 1 is returned.
-  int executeInstructions(const std::vector<Instruction>& insts);
   int executeInstruction(const Instruction& inst);
 
+  std::uint8_t getMemByte(std::uint64_t addr) const;
+  std::uint8_t getMemQuad(std::uint64_t addr) const;
+
+public:
   // For debugging
   void printAllRegs() const;
   void printGenRegs() const;
@@ -56,11 +75,24 @@ private:
   bool overflowFlag;
   Stat stat;
 
+  // value registers, save temporary results
+  std::int64_t valA;   // R[ra] in instruction
+  std::int64_t valB;   // R[rb] in instruction
+  std::int64_t valC;   // 8 bytes value in instruction
+  std::int64_t valE;   // temporary result
+  std::int64_t valM;   // 8 bytes memory value
+  std::int64_t valP;   // R[PC]
+
+  Register rA;
+  Register rB;
+  std::uint8_t icode;
+  std::uint8_t ifun;
+
   // General registers
   #define REGISTER(NAME, STR, ID) Register NAME;
   #include "registers.def"
 
-  std::array<std::uint64_t, kNumGeneralRegs> valueRegs;
+  std::array<std::int64_t, kNumGeneralRegs> valueRegs;
 };
 
 } // namespace y64

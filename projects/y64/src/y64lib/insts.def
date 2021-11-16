@@ -2,10 +2,6 @@
 #define INST(NAME, ICODE, IFUN)
 #endif
 
-#ifndef INST_COND
-#define INST_COND(NAME, ICODE)
-#endif
-
 #ifndef COND
 #define COND(NAME, IFUN)
 #endif
@@ -27,29 +23,41 @@ INST(ret,       0x9,   0)
 INST(pushq,     0xA,   0)
 INST(popq,      0xB,   0)
 
-// pseudo instruction
+
+// pseudo instructions
 INST(dot_pos,   0xC,   0)
 INST(dot_align, 0xC,   1)
 INST(dot_quad,  0xC,   2)
 
-//        name   icode
-INST_COND(cmov,  2)
-INST_COND(j,     7)
 
-//   name   ifun
-COND(le,    0x1)
-COND(l,     0x2)
-COND(e,     0x3)
-COND(ne,    0x4)
-COND(ge,    0x5)
-COND(g,     0x6)
+// conditional instructions
+// cmov and j are both invalid instructions
+//   name       icode  ifun
+INST(cmov,      0x2,   0)
+INST(cmovle,    0x2,   1)
+INST(cmovl,     0x2,   2)
+INST(cmove,     0x2,   3)
+INST(cmovne,    0x2,   4)
+INST(cmovge,    0x2,   5)
+INST(cmovg,     0x2,   6)
+
+INST(j,         0x7,   0)
+INST(jle,       0x7,   1)
+INST(jl,        0x7,   2)
+INST(je,        0x7,   3)
+INST(jne,       0x7,   4)
+INST(jge,       0x7,   5)
+INST(jg,        0x7,   6)
+
+COND(le, 0)
+COND(l,  1)
+COND(e,  2)
+COND(ne, 4)
+COND(ge, 5)
+COND(g,  6)
 
 #ifdef INST
 #undef INST
-#endif
-
-#ifdef INST_COND
-#undef INST_COND
 #endif
 
 #ifdef COND

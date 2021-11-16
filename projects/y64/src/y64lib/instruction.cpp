@@ -4,8 +4,8 @@
 
 namespace y64 {
 
-std::size_t Instruction::length() const {
-  switch (icode) {
+std::size_t Instruction::length(std::uint8_t opcode) {
+  switch (opcode >> 4) {
   case icode_halt:
   case icode_nop:
   case icode_ret:
@@ -25,6 +25,10 @@ std::size_t Instruction::length() const {
   default:
     Y64_UNREACHABLE("Unknown instruction");
   }
+}
+
+std::size_t Instruction::length() const {
+  return length(getOpCode());
 }
 
 void Instruction::emit(InstBuffer& buf, std::size_t& len) const {

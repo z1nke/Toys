@@ -11,26 +11,19 @@ namespace y64 {
 class Instruction {
 public:
   enum ICode : std::uint8_t {
-#define INST(NAME, ICODE, IFUN) icode_##NAME = ICODE,
-#define INST_COND(NAME, ICODE)  icode_##NAME = ICODE,
-  #include "insts.def"
+    #define INST(NAME, ICODE, IFUN) icode_##NAME = ICODE,
+    #include "insts.def"
   };
 
   enum IFun : std::uint8_t {
-#define COND(NAME, IFUN)  ifun_##NAME = IFUN,
-  #include "insts.def"
+    #define INST(NAME, ICODE, IFUN) ifun_##NAME = IFUN,
+    #define COND(NAME, IFUN) ifun_##NAME = IFUN,
+    #include "insts.def"
   };
 
   enum OpCode : std::uint8_t {
-#define INST(NAME, ICODE, IFUN) NAME = ((ICODE << 4) | IFUN),
-#define INST_COND(NAME, ICODE) \
-    INST(NAME##le, ICODE, 0x1) \
-    INST(NAME##l,  ICODE, 0x2) \
-    INST(NAME##e,  ICODE, 0x3) \
-    INST(NAME##ne, ICODE, 0x4) \
-    INST(NAME##ge, ICODE, 0x5) \
-    INST(NAME##g,  ICODE, 0x6)
-  #include "insts.def"
+    #define INST(NAME, ICODE, IFUN) NAME = ((ICODE << 4) | IFUN),
+    #include "insts.def"
   };
 
 
@@ -43,6 +36,7 @@ public:
   Instruction& operator=(const Instruction&) = default;
 
   std::size_t length() const;
+  static std::size_t length(std::uint8_t opcode);
 
   void setOpCode(std::uint8_t opcode) {
     icode = opcode >> 4;
@@ -57,6 +51,11 @@ public:
     return regA.id() << 4 | regB.id();
   }
 
+  void setRegister(std::uint8_t reg) {
+    regA = Register::make(reg >> 4);
+    regB = Register::make(reg & 0xF);
+  }
+
   void setAddress(std::uint64_t addr) {
     this->addr = addr;
     hasAddr = true;
@@ -65,6 +64,11 @@ public:
   void emit(InstBuffer& buf, std::size_t& len) const;
 
 public:
+  // value is:
+  // (1) a pending dummy address of instruction or
+  // (2) a value of pseduo instruction or
+  // (3) an address of memory
+  // (4) an immediate number
   std::int64_t value;
   std::uint64_t addr;
   int line;
@@ -75,8 +79,8 @@ public:
   bool isPseduo;
   bool isPendingAddress;
   bool hasAddr;
-};
+}; // class Instruction
 
-} // class Instruction
+} // namespace y64
 
 #endif // !Y64_LIB_INSTRUCTION_HPP

@@ -105,6 +105,7 @@ void AsmParser::genAllCode(const std::vector<Instruction>& insts) {
 
 void AsmParser::emit(std::ofstream& fout) {
   assert(fout.is_open());
+  fout << magicNumber;
   fout.write(reinterpret_cast<const char*>(out.data()), out.size());
 }
 

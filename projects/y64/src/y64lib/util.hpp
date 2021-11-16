@@ -32,6 +32,8 @@ namespace details {
                                            const char* filename,
                                            unsigned lineno);
 } // namespace details
+
+extern const char* magicNumber;
 } // namespace y64
 
 #define Y64_UNREACHABLE(msg) \

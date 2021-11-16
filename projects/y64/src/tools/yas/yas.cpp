@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
 
   try {
     parser.parseStatements();
-  } catch (ParseException& e) {
+  } catch (ParsingException& e) {
     cerr << e.what() << endl;
     return 1;
   }

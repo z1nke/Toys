@@ -30,22 +30,6 @@ const char* statToStr(Y64Machine::Stat stat) {
   }
 }
 
-int Y64Machine::executeInstructions(const std::vector<Instruction>& insts) {
-  for (const Instruction& inst : insts) {
-    int err = executeInstruction(inst);
-    if (err) {
-      return err;
-    }
-  }
-
-  return 0;
-}
-
-int Y64Machine::executeInstruction(const Instruction& inst) {
-  // TODO: Implement me
-  (void)inst;
-}
-
 void Y64Machine::printAllRegs() const {
   std::cout << "pc:" << pc << '\t'
             << "ZF:" << zeroFlag << ' '

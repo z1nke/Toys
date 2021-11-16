@@ -3,25 +3,24 @@
 
 #include <stdexcept>
 
+#define DEFINE_EXCEPTION_CLASS(CLASS_NAME)                          \
+class CLASS_NAME : public std::exception {                          \
+public:                                                             \
+  explicit CLASS_NAME(const char* msg) noexcept                     \
+     : std::exception(), message(msg) { }                           \
+  CLASS_NAME(const CLASS_NAME&) = default;                          \
+  ~CLASS_NAME() noexcept override { }                               \
+  CLASS_NAME& operator=(const CLASS_NAME& rhs) = default;           \
+  const char* what() const noexcept override {                      \
+    return message.c_str();                                         \
+  }                                                                 \
+private:                                                            \
+  std::string message;                                              \
+}
+
 namespace y64 {
-
-class ParseException : public std::exception {
-public:
-  explicit ParseException(const char* msg) noexcept
-     : std::exception(), message(msg) { }
-
-  ParseException(const ParseException&) noexcept = default;
-  ~ParseException() noexcept override { }
-  ParseException& operator=(const ParseException& rhs) noexcept = default;
-
-  const char* what() const noexcept override {
-    return message.c_str();
-  }
-
-private:
-  std::string message;
-};
-
+DEFINE_EXCEPTION_CLASS(ParsingException);
+DEFINE_EXCEPTION_CLASS(RunningException);
 } // namespace y64
 
 #endif //!Y64_LIB_Y64_EXCEPTION_HPP

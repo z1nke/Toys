@@ -49,5 +49,7 @@ void y64::parseError(const char* fmt, ...) {
   va_end(args);
   assert(len < static_cast<int>(sizeof(buffer)));
   buffer[len] = '\0';
-  throw ParseException{ buffer };
+  throw ParsingException{ buffer };
 }
+
+const char* y64::magicNumber = "y64;";
