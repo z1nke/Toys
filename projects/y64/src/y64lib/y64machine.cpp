@@ -3,6 +3,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "buffer.hpp"
+#include "y64exception.hpp"
 #include "util.hpp"
 
 namespace y64 {
@@ -30,6 +32,68 @@ const char* statToStr(Y64Machine::Stat stat) {
   }
 }
 
+void Y64Machine::fetch() {
+  inst.setOpCode(getMemByte(pc));
+  switch (inst.icode) {
+  case Instruction::icode_halt:
+  case Instruction::icode_nop:
+  case Instruction::icode_ret:
+    valP = pc + 1;
+    break;
+  case Instruction::icode_cmov:
+  case Instruction::icode_addq:
+  case Instruction::icode_pushq:
+  case Instruction::icode_popq:
+    inst.setRegister(getMemByte(pc + 1));
+    valP = pc + 2;
+    break;
+  case Instruction::icode_j:
+  case Instruction::icode_call:
+    valC = getMemQuad(pc + 1);
+    valP = pc + 9;
+    break;
+  case Instruction::icode_irmovq:
+  case Instruction::icode_rmmovq:
+  case Instruction::icode_mrmovq:
+    inst.setRegister(getMemByte(pc + 1));
+    valC = getMemQuad(pc + 2);
+    valP = pc + 10;
+    break;
+  default:
+    stat = Stat::INS;
+    throw RunningException{ stat, inst.getOpCode() };
+  }
+}
+
+void Y64Machine::decode() {
+  switch (inst.icode) {
+  case Instruction::icode_cmov:
+    valA = valueRegs[inst.regA.id()];
+    break;
+  case Instruction::icode_mrmovq:
+    valB = valueRegs[inst.regB.id()];
+    break;
+  case Instruction::icode_rmmovq:
+    valA = valueRegs[inst.regA.id()];
+    valB = valueRegs[inst.regB.id()];
+    break;
+  case Instruction::icode_call:
+    valB = valueRegs[rsp.id()];
+    break;
+  case Instruction::icode_ret:
+  case Instruction::icode_popq:
+    valA = valueRegs[rsp.id()];
+    valB = valueRegs[rsp.id()];
+    break;
+  case Instruction::icode_pushq:
+    valA = valueRegs[inst.regA.id()];
+    valB = valueRegs[rsp.id()];
+    break;
+  default:
+    break;
+  }
+}
+
 void Y64Machine::printAllRegs() const {
   std::cout << "pc:" << pc << '\t'
             << "ZF:" << zeroFlag << ' '
@@ -37,6 +101,25 @@ void Y64Machine::printAllRegs() const {
             << "OF:" << overflowFlag << '\t'
             << "Stat:" << statToStr(stat) << "\n";
   printGenRegs();
+}
+
+std::uint8_t Y64Machine::getMemByte(std::uint64_t addr) {
+  if (addr >= mem.size()) {
+    stat = Stat::ADR;
+    throw RunningException{ stat, addr };
+  }
+  return mem[addr];
+}
+
+std::int64_t Y64Machine::getMemQuad(std::uint64_t addr) {
+  if (mem.size() < 8 || addr > mem.size() - 8) {
+    stat = Stat::ADR;
+    throw RunningException{ stat, addr + 8 };
+  }
+
+  InstBuffer buf;
+  buf.append(mem.data() + addr, 8);
+  return buf.retrieveI64();
 }
 
 

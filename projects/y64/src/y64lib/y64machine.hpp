@@ -26,7 +26,7 @@ public:
   Y64Machine() : mem(std::vector<std::uint8_t>(kMemorySize)),
                  pc(0), zeroFlag(false), signedFlag(false), overflowFlag(false),
                  stat(Stat::AOK), valA(0), valB(0), valC(0), valE(0), valM(0),
-                 valP(0), rA(Register::makeNone()), rB(Register::makeNone()) {
+                 valP(0), inst() {
     #define REGISTER(NAME, STR, ID) NAME = Register::make(ID);
     #include "registers.def"
 
@@ -48,14 +48,8 @@ public:
   void updatePC();
 
 private:
-  #define INST(NAME, ICODE, IFUN) int NAME##Exec(const Instruction& inst);
-  #include "insts.def"
-
-  // Return 0 on success. On error, 1 is returned.
-  int executeInstruction(const Instruction& inst);
-
-  std::uint8_t getMemByte(std::uint64_t addr) const;
-  std::uint8_t getMemQuad(std::uint64_t addr) const;
+  std::uint8_t getMemByte(std::uint64_t addr);
+  std::int64_t getMemQuad(std::uint64_t addr);
 
 public:
   // For debugging
@@ -77,16 +71,14 @@ private:
 
   // value registers, save temporary results
   std::int64_t valA;   // R[ra] in instruction
-  std::int64_t valB;   // R[rb] in instruction
+  std::int64_t valB;   // R[rb] in instruction or R[%rsp]
   std::int64_t valC;   // 8 bytes value in instruction
   std::int64_t valE;   // temporary result
   std::int64_t valM;   // 8 bytes memory value
-  std::int64_t valP;   // R[PC]
+  std::uint64_t valP;  // R[PC]
 
-  Register rA;
-  Register rB;
-  std::uint8_t icode;
-  std::uint8_t ifun;
+  // For get icode:ifun and rA:rB
+  Instruction inst;
 
   // General registers
   #define REGISTER(NAME, STR, ID) Register NAME;

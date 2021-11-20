@@ -2,6 +2,8 @@
 #define Y64_LIB_BUFFER_HPP
 
 #include <array>
+#include <cassert>
+#include <cstring>
 
 #include "util.hpp"
 
@@ -20,21 +22,22 @@ public:
   }
 
   void append(std::uint8_t u8) {
+    assert(len < kMaxInstLen);
     store[len++] = u8;
   }
 
+  void append(const std::uint8_t* src, std::size_t n) {
+    assert(n < kMaxInstLen - len);
+    std::memmove(store.data() + len, src, n);
+    len += n;
+  }
+
   void append(std::int64_t i64) {
+    assert(n < kMaxInstLen - sizeof(std::int64_t));
     Value64 v;
     v.i64 = i64;
-    if (Endian::native == Endian::little) {
-      for (int i = 0; i < 8; ++i) {
-        append(v.arr[i]);
-      }
-    } else {
-      for (int i = 7; i >= 0; --i) {
-        append(v.arr[i]);
-      }
-    }
+    std::memmove(store.data() + len, v.arr, sizeof(std::int64_t));
+    len += sizeof(std::int64_t);
   }
 
   void append(std::uint64_t u64) {
@@ -42,21 +45,17 @@ public:
   }
 
   std::uint8_t retrieveByte() {
+    assert(len >= sizeof(std::uint8_t));
     return store[--len];
   }
 
   std::int64_t retrieveI64() {
+    assert(len >= sizeof(std::int64_t));
     Value64 v;
-    if (Endian::native == Endian::little) {
-      for (int i = 7; i >= 0; --i) {
-        v.arr[i] = retrieveByte();
-      }
-    } else {
-      for (int i = 0; i < 8; ++i) {
-        v.arr[i] = retrieveByte();
-      }
-    }
-
+    v.i64 = 0;
+    std::memmove(v.arr, store.data() + len - sizeof(std::int64_t),
+                 sizeof(std::int64_t));
+    len -= sizeof(std::int64_t);
     return v.i64;
   }
 

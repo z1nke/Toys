@@ -3,24 +3,41 @@
 
 #include <stdexcept>
 
-#define DEFINE_EXCEPTION_CLASS(CLASS_NAME)                          \
-class CLASS_NAME : public std::exception {                          \
-public:                                                             \
-  explicit CLASS_NAME(const char* msg) noexcept                     \
-     : std::exception(), message(msg) { }                           \
-  CLASS_NAME(const CLASS_NAME&) = default;                          \
-  ~CLASS_NAME() noexcept override { }                               \
-  CLASS_NAME& operator=(const CLASS_NAME& rhs) = default;           \
-  const char* what() const noexcept override {                      \
-    return message.c_str();                                         \
-  }                                                                 \
-private:                                                            \
-  std::string message;                                              \
-}
-
 namespace y64 {
-DEFINE_EXCEPTION_CLASS(ParsingException);
-DEFINE_EXCEPTION_CLASS(RunningException);
+class ParsingException : public std::exception {
+public:
+  explicit ParsingException(const char* msg) noexcept
+      : std::exception(), message(msg) { }
+  ParsingException(const ParsingException&) = default;
+  ~ParsingException() noexcept override { }
+  ParsingException& operator=(const ParsingException& rhs) = default;
+  const char* what() const noexcept override {
+    return message.c_str();
+  }
+
+private:
+  std::string message;
+};
+
+class RunningException : public std::exception {
+public:
+  explicit RunningException(std::uint8_t stat, std::uint64_t value) noexcept
+    : std::exception(), stat(stat), value(value) { }
+  RunningException(const RunningException&) = default;
+  ~RunningException() noexcept override { }
+  RunningException& operator=(const RunningException& rhs) = default;
+
+  std::uint8_t getStat() const {
+    return stat;
+  }
+
+  std::uint64_t getValue() const {
+    return value;
+  }
+private:
+  std::uint8_t stat;
+  std::uint64_t value;
+};
 } // namespace y64
 
 #endif //!Y64_LIB_Y64_EXCEPTION_HPP
