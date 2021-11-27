@@ -15,20 +15,16 @@ public:
   };
 
   std::string name() const;
-  std::uint8_t id() const {
-    return static_cast<std::uint8_t>(rid);
-  }
+  std::uint8_t id() const { return static_cast<std::uint8_t>(rid); }
 
   Register() : rid(err) {}
-  Register(const Register&) = default;
-  Register& operator=(const Register&) = default;
+  Register(const Register &) = default;
+  Register &operator=(const Register &) = default;
 
-  bool isErr() const {
-    return rid >= err;
-  }
+  bool isErr() const { return rid >= err; }
 
   // make register from y64 assembly code
-  static Register make(int line, const std::string& name);
+  static Register make(int line, const std::string &name);
   static Register makeNone();
 
   // make register for y64 machine
@@ -38,7 +34,7 @@ public:
 
 private:
   // str: register str, such as %rax, %rsp, etc.
-  explicit Register(const std::string& str);
+  explicit Register(const std::string &str);
   explicit Register(RID r) : rid(r) {}
 
 private:

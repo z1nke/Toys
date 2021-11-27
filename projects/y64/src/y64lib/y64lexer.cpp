@@ -28,7 +28,7 @@ AsmToken::Kind AsmLexer::lookahead() {
   return nextTokens.back().getKind();
 }
 
-const AsmToken& AsmLexer::lex() {
+const AsmToken &AsmLexer::lex() {
   if (needEat && !nextTokens.empty()) {
     nextTokens.pop_back();
   }
@@ -62,7 +62,7 @@ AsmToken AsmLexer::lexToken() {
     ++line;
     col = 0;
     return AsmToken(AsmToken::ENDLINE,
-        std::string_view(tokenStart, curPtr - tokenStart));
+                    std::string_view(tokenStart, curPtr - tokenStart));
   case '\n':
     ++line;
     col = 0;
@@ -83,9 +83,18 @@ AsmToken AsmLexer::lexToken() {
     return AsmToken(AsmToken::RPAREN, std::string_view(tokenStart, 1));
   case '.':
     return lexPseudoInst();
-  case '-': case '+':
-  case '0': case '1': case '2': case '3': case '4':
-  case '5': case '6': case '7': case '8': case '9':
+  case '-':
+  case '+':
+  case '0':
+  case '1':
+  case '2':
+  case '3':
+  case '4':
+  case '5':
+  case '6':
+  case '7':
+  case '8':
+  case '9':
     return lexNumber();
   default:
     if (std::isalpha(curChar) || curChar == '_') {
@@ -113,7 +122,7 @@ AsmToken AsmLexer::lexComment() {
   }
 
   return AsmToken(AsmToken::COMMENT,
-      std::string_view(tokenStart, curPtr - tokenStart));
+                  std::string_view(tokenStart, curPtr - tokenStart));
 }
 
 bool AsmLexer::isDigit(char ch, int base) const {
@@ -124,11 +133,10 @@ bool AsmLexer::isDigit(char ch, int base) const {
 
   // hex
   return std::isdigit(ch) || (ch >= 'A' && ch <= 'F') ||
-      (ch >= 'a' && ch <= 'f');
+         (ch >= 'a' && ch <= 'f');
 }
 
 AsmToken AsmLexer::lexNumber() {
-  bool isHex = false;
   bool isNegative = false;
   if (curPtr[-1] == '-') {
     isNegative = true;
@@ -167,23 +175,23 @@ AsmToken AsmLexer::lexDecOrHexNumber(int base, bool isNegative) {
 
   try {
     value = std::stoll(numStr, nullptr, base);
-  } catch (std::invalid_argument&) {
+  } catch (std::invalid_argument &) {
     parseError("%d: Invalid number '%s'", line, numStr.c_str());
-  } catch (std::out_of_range&) {
+  } catch (std::out_of_range &) {
     parseError("%d: Immediate '%s' is too large", line, numStr.c_str());
   }
 
   return AsmToken::makeNumber(tokenStart, curPtr - tokenStart,
-      static_cast<std::int64_t>(value));
+                              static_cast<std::int64_t>(value));
 }
 
 AsmToken AsmLexer::lexRegister() {
   AsmToken token = lexIdentifier(true);
-  std::string identifier{ token.toStringRef().data(),
-                          token.toStringRef().size() };
-  static const std::regex
-      registerRegex{ "%rax|%rcx|%rdx|%rbx|%rsp|%rbp|%rsi|%rdi|"
-                     "%r8|%r9|%r10|%r11|%r12|%r13|%r14" };
+  std::string identifier{token.toStringRef().data(),
+                         token.toStringRef().size()};
+  static const std::regex registerRegex{
+      "%rax|%rcx|%rdx|%rbx|%rsp|%rbp|%rsi|%rdi|"
+      "%r8|%r9|%r10|%r11|%r12|%r13|%r14"};
   bool isMatch = std::regex_match(identifier, registerRegex,
                                   std::regex_constants::match_continuous);
 
@@ -198,16 +206,16 @@ AsmToken AsmLexer::lexRegister() {
 
 AsmToken AsmLexer::lexPseudoInst() {
   AsmToken token = lexIdentifier(true);
-  std::string identifier{ token.toStringRef().data(),
-                          token.toStringRef().size() };
-  static const std::regex
-      pseudoRegex{ "\\.byte|\\.word|\\.long|\\.quad|\\.pos|\\.align" };
+  std::string identifier{token.toStringRef().data(),
+                         token.toStringRef().size()};
+  static const std::regex pseudoRegex{
+      "\\.byte|\\.word|\\.long|\\.quad|\\.pos|\\.align"};
   bool isMatch = std::regex_match(identifier, pseudoRegex,
                                   std::regex_constants::match_continuous);
 
   if (!isMatch) {
-    parseError("%d: Unknown pseudo instruction name '%s'",
-          line, identifier.c_str());
+    parseError("%d: Unknown pseudo instruction name '%s'", line,
+               identifier.c_str());
   }
 
   token.setKind(AsmToken::PSEUDO_INST);
@@ -236,26 +244,25 @@ AsmToken AsmLexer::lexIdentifier(bool hasPrefix) {
 
   if (hasPrefix) {
     return AsmToken(AsmToken::IDENTIFIER,
-        std::string_view(tokenStart, curPtr - tokenStart));
+                    std::string_view(tokenStart, curPtr - tokenStart));
   }
 
   // try to match instruction name
-  static const std::regex
-      instRegex{"halt|nop|rrmovq|cmovle|cmovl|cmove|cmovne|"
-                "cmovge|cmovg|rmmovq|mrmovq|irmovq|addq|subq|"
-                "andq|xorq|jmp|jle|jl|je|jne|jge|jg|call|ret|"
-                "pushq|popq"};
+  static const std::regex instRegex{
+      "halt|nop|rrmovq|cmovle|cmovl|cmove|cmovne|"
+      "cmovge|cmovg|rmmovq|mrmovq|irmovq|addq|subq|"
+      "andq|xorq|jmp|jle|jl|je|jne|jge|jg|call|ret|"
+      "pushq|popq"};
 
-  bool isMatchInst =
-    std::regex_match(identifier, instRegex,
-                     std::regex_constants::match_continuous);
+  bool isMatchInst = std::regex_match(identifier, instRegex,
+                                      std::regex_constants::match_continuous);
   if (isMatchInst) {
     return AsmToken(AsmToken::INST,
-        std::string_view(tokenStart, curPtr - tokenStart));
+                    std::string_view(tokenStart, curPtr - tokenStart));
   }
 
   return AsmToken(AsmToken::IDENTIFIER,
-      std::string_view(tokenStart, curPtr - tokenStart));
+                  std::string_view(tokenStart, curPtr - tokenStart));
 }
 
 } // namespace y64

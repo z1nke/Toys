@@ -5,6 +5,9 @@
 namespace y64 {
 
 std::size_t Instruction::length(std::uint8_t opcode) {
+  if (opcode == dot_quad)
+    return 8;
+
   switch (opcode >> 4) {
   case icode_halt:
   case icode_nop:
@@ -27,11 +30,9 @@ std::size_t Instruction::length(std::uint8_t opcode) {
   }
 }
 
-std::size_t Instruction::length() const {
-  return length(getOpCode());
-}
+std::size_t Instruction::length() const { return length(getOpCode()); }
 
-void Instruction::emit(InstBuffer& buf, std::size_t& len) const {
+void Instruction::emit(InstBuffer &buf, std::size_t &len) const {
   buf.append(getOpCode());
   switch (icode) {
   case icode_halt:

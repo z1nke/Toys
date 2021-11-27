@@ -11,29 +11,27 @@ namespace y64 {
 
 class InstBuffer {
 public:
-  InstBuffer() : store(), len(0) { }
+  InstBuffer() : store(), len(0) {}
 
-  std::size_t size() const {
-    return len;
-  }
+  std::size_t size() const { return len; }
 
-  const std::array<std::uint8_t, kMaxInstLen>& data() {
-    return store;
-  }
+  const std::array<std::uint8_t, kMaxInstLen> &data() const { return store; }
+
+  std::array<std::uint8_t, kMaxInstLen> &data() { return store; }
 
   void append(std::uint8_t u8) {
     assert(len < kMaxInstLen);
     store[len++] = u8;
   }
 
-  void append(const std::uint8_t* src, std::size_t n) {
-    assert(n < kMaxInstLen - len);
+  void append(const std::uint8_t *src, std::size_t n) {
+    assert(n + len <= kMaxInstLen);
     std::memmove(store.data() + len, src, n);
     len += n;
   }
 
   void append(std::int64_t i64) {
-    assert(n < kMaxInstLen - sizeof(std::int64_t));
+    assert(len + sizeof(std::int64_t) <= kMaxInstLen);
     Value64 v;
     v.i64 = i64;
     std::memmove(store.data() + len, v.arr, sizeof(std::int64_t));
@@ -77,4 +75,4 @@ private:
 
 } // namespace y64
 
-#endif //!Y64_LIB_BUFFER_HPP
+#endif //! Y64_LIB_BUFFER_HPP

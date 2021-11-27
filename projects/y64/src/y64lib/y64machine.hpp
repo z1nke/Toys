@@ -10,7 +10,7 @@
 
 namespace y64 {
 
-class Y64Machine {
+class Machine {
 public:
   static const std::uint64_t kMemorySize = 0x2000;
   static const std::size_t kNumGeneralRegs = 15;
@@ -23,20 +23,20 @@ public:
   };
 
 public:
-  Y64Machine() : mem(std::vector<std::uint8_t>(kMemorySize)),
-                 pc(0), zeroFlag(false), signedFlag(false), overflowFlag(false),
-                 stat(Stat::AOK), valA(0), valB(0), valC(0), valE(0), valM(0),
-                 valP(0), inst() {
-    #define REGISTER(NAME, STR, ID) NAME = Register::make(ID);
-    #include "registers.def"
+  Machine()
+      : mem(std::vector<std::uint8_t>(kMemorySize)), pc(0), zeroFlag(0),
+        signedFlag(0), overflowFlag(0), stat(Stat::AOK), valA(0), valB(0),
+        valC(0), valE(0), valM(0), valP(0), cnd(false), inst() {
+#define REGISTER(NAME, STR, ID) NAME = Register::make(ID);
+#include "registers.def"
 
     valueRegs.fill(0);
   }
 
 public:
   // Load bytes buffer or file to memory
-  void load(const std::vector<std::uint8_t>& buffer);
-  void load(const std::string& filename);
+  bool load(const std::vector<std::uint8_t> &buffer);
+  bool load(const std::string &filename);
 
   // Fetch, decode, excute, memory, write back, update PC
   // See https://w3.cs.jmu.edu/lam2mo/cs261_2018_08/files/y86-isa.pdf
@@ -47,9 +47,17 @@ public:
   void writeBack();
   void updatePC();
 
+  bool isOk() const {
+    return stat == Stat::AOK;
+  }
+
 private:
-  std::uint8_t getMemByte(std::uint64_t addr);
-  std::int64_t getMemQuad(std::uint64_t addr);
+  std::uint8_t readMemByte(std::uint64_t addr);
+  std::int64_t readMemQuad(std::uint64_t addr);
+  void writeMemQuad(std::uint64_t addr, std::int64_t val);
+  void writeMemInst(std::uint64_t addr, const InstBuffer &buf);
+  bool getCondition();
+  void executeOpInst();
 
 public:
   // For debugging
@@ -59,30 +67,31 @@ public:
 
 private:
   void printLineMemoryByte(std::uint64_t offset, std::uint64_t n,
-                           void(*print)(std::uint8_t)) const;
+                           void (*print)(std::uint8_t)) const;
 
 private:
   std::vector<std::uint8_t> mem;
   std::uint64_t pc;
-  bool zeroFlag;
-  bool signedFlag;
-  bool overflowFlag;
+  std::uint8_t zeroFlag;
+  std::uint8_t signedFlag;
+  std::uint8_t overflowFlag;
   Stat stat;
 
   // value registers, save temporary results
-  std::int64_t valA;   // R[ra] in instruction
-  std::int64_t valB;   // R[rb] in instruction or R[%rsp]
-  std::int64_t valC;   // 8 bytes value in instruction
-  std::int64_t valE;   // temporary result
-  std::int64_t valM;   // 8 bytes memory value
-  std::uint64_t valP;  // R[PC]
+  std::int64_t valA;  // R[ra] in instruction
+  std::int64_t valB;  // R[rb] in instruction or R[%rsp]
+  std::int64_t valC;  // 8 bytes value in instruction
+  std::int64_t valE;  // temporary result
+  std::int64_t valM;  // 8 bytes memory value
+  std::uint64_t valP; // R[PC]
+  bool cnd;
 
   // For get icode:ifun and rA:rB
   Instruction inst;
 
-  // General registers
-  #define REGISTER(NAME, STR, ID) Register NAME;
-  #include "registers.def"
+// General registers
+#define REGISTER(NAME, STR, ID) Register NAME;
+#include "registers.def"
 
   std::array<std::int64_t, kNumGeneralRegs> valueRegs;
 };

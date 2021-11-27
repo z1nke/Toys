@@ -25,57 +25,42 @@ public:
     RPAREN,  // )
   };
 
-  AsmToken() : kind(ERROR), tokenStr(), value(0) { }
+  AsmToken() : kind(ERROR), tokenStr(), value(0) {}
   AsmToken(Kind kind, std::string_view str)
-      : kind(kind), tokenStr(str), value(0) { }
+      : kind(kind), tokenStr(str), value(0) {}
 
-  static AsmToken makeNumber(const char* start, std::size_t len,
+  static AsmToken makeNumber(const char *start, std::size_t len,
                              std::int64_t val) {
-    AsmToken token{ NUMBER, std::string_view{start, len} };
+    AsmToken token{NUMBER, std::string_view{start, len}};
     token.value = val;
     return token;
   }
 
-  AsmToken(const AsmToken&) = default;
-  AsmToken(AsmToken&&) noexcept = default;
-  AsmToken& operator=(const AsmToken&) = default;
-  AsmToken& operator=(AsmToken&&) noexcept = default;
+  AsmToken(const AsmToken &) = default;
+  AsmToken(AsmToken &&) noexcept = default;
+  AsmToken &operator=(const AsmToken &) = default;
+  AsmToken &operator=(AsmToken &&) noexcept = default;
 
-  Kind getKind() const {
-    return kind;
-  }
+  Kind getKind() const { return kind; }
 
-  std::string_view toStringRef() const {
-    return tokenStr;
-  }
+  std::string_view toStringRef() const { return tokenStr; }
 
   std::string toString() const {
     return std::string(tokenStr.data(), tokenStr.size());
   }
 
-  const char* data() const {
-    return tokenStr.data();
-  }
+  const char *data() const { return tokenStr.data(); }
 
-  void setKind(Kind k) {
-    kind = k;
-  }
+  void setKind(Kind k) { kind = k; }
 
-  std::int64_t getValue() const {
-    return value;
-  }
+  std::int64_t getValue() const { return value; }
 
-  const char* kindString() const {
-    return kindToString(kind);
-  }
+  const char *kindString() const { return kindToString(kind); }
 
-  bool isError() const {
-    return kind == ERROR;
-  }
+  bool isError() const { return kind == ERROR; }
 
-  static const char* kindToString(AsmToken::Kind kind) {
-    switch (kind)
-    {
+  static const char *kindToString(AsmToken::Kind kind) {
+    switch (kind) {
     case y64::AsmToken::TKEOF:
       return "eof";
     case y64::AsmToken::ERROR:

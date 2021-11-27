@@ -11,29 +11,28 @@ namespace y64 {
 class Instruction {
 public:
   enum ICode : std::uint8_t {
-    #define INST(NAME, ICODE, IFUN) icode_##NAME = ICODE,
-    #include "insts.def"
+#define INST(NAME, ICODE, IFUN) icode_##NAME = ICODE,
+#include "insts.def"
   };
 
   enum IFun : std::uint8_t {
-    #define INST(NAME, ICODE, IFUN) ifun_##NAME = IFUN,
-    #define COND(NAME, IFUN) ifun_##NAME = IFUN,
-    #include "insts.def"
+#define INST(NAME, ICODE, IFUN) ifun_##NAME = IFUN,
+#define COND(NAME, IFUN) ifun_##NAME = IFUN,
+#include "insts.def"
   };
 
   enum OpCode : std::uint8_t {
-    #define INST(NAME, ICODE, IFUN) NAME = ((ICODE << 4) | IFUN),
-    #include "insts.def"
+#define INST(NAME, ICODE, IFUN) NAME = ((ICODE << 4) | IFUN),
+#include "insts.def"
   };
-
 
 public:
   Instruction()
-      : value(), addr(0), line(), icode(), ifun(), regA(), regB(),
-        isPseduo(), isPendingAddress(), hasAddr(false) { }
+      : value(), addr(0), line(), icode(), ifun(), regA(), regB(), isPseduo(),
+        isPendingAddress(), hasAddr(false) {}
 
-  Instruction(const Instruction&) = default;
-  Instruction& operator=(const Instruction&) = default;
+  Instruction(const Instruction &) = default;
+  Instruction &operator=(const Instruction &) = default;
 
   std::size_t length() const;
   static std::size_t length(std::uint8_t opcode);
@@ -43,13 +42,9 @@ public:
     ifun = opcode & 0xF;
   }
 
-  std::uint8_t getOpCode() const {
-    return (icode << 4) | ifun;
-  }
+  std::uint8_t getOpCode() const { return (icode << 4) | ifun; }
 
-  std::uint8_t getRegister() const {
-    return regA.id() << 4 | regB.id();
-  }
+  std::uint8_t getRegister() const { return regA.id() << 4 | regB.id(); }
 
   void setRegister(std::uint8_t reg) {
     regA = Register::make(reg >> 4);
@@ -61,7 +56,7 @@ public:
     hasAddr = true;
   }
 
-  void emit(InstBuffer& buf, std::size_t& len) const;
+  void emit(InstBuffer &buf, std::size_t &len) const;
 
 public:
   // value is:

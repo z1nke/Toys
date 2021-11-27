@@ -10,22 +10,20 @@ using namespace std::string_view_literals;
 
 namespace {
 
-constexpr bool
-stringViewStartsWith(std::string_view sv, std::string_view str) {
-  return sv.size() >= str.size() &&
-      std::string_view::traits_type::compare(
-          sv.data(), str.data(), str.size()) == 0;
+constexpr bool stringViewStartsWith(std::string_view sv, std::string_view str) {
+  return sv.size() >= str.size() && std::string_view::traits_type::compare(
+                                        sv.data(), str.data(), str.size()) == 0;
 }
 
 } // namespace
 
 namespace y64 {
 
-static std::unordered_map<std::string/*label*/,
-                          std::uint64_t/*address*/> labelTable;
+static std::unordered_map<std::string /*label*/, std::uint64_t /*address*/>
+    labelTable;
 
-static std::unordered_map<std::uint64_t/*pending addr*/,
-                          std::string/*label*/> pendingAddr2Label;
+static std::unordered_map<std::uint64_t /*pending addr*/, std::string /*label*/>
+    pendingAddr2Label;
 
 std::uint64_t AsmParser::pendingAddress = 1;
 
@@ -75,14 +73,14 @@ std::vector<Instruction> AsmParser::parseStatements() {
   Y64_UNREACHABLE("Unknown parse error");
 }
 
-void AsmParser::calcPendingAddress(std::vector<Instruction>& insts) {
-  for (Instruction& inst : insts) {
+void AsmParser::calcPendingAddress(std::vector<Instruction> &insts) {
+  for (Instruction &inst : insts) {
     if (!inst.isPendingAddress) {
       continue;
     }
 
     std::uint64_t dummyAddr = static_cast<std::uint64_t>(inst.value);
-    const std::string& label = pendingAddr2Label[dummyAddr];
+    const std::string &label = pendingAddr2Label[dummyAddr];
     if (label.empty()) {
       parseError("Unknown dummy address '%" PRIu64 "'", dummyAddr);
     }
@@ -97,27 +95,26 @@ void AsmParser::calcPendingAddress(std::vector<Instruction>& insts) {
   }
 }
 
-void AsmParser::genAllCode(const std::vector<Instruction>& insts) {
-  for (const Instruction& inst : insts) {
+void AsmParser::genAllCode(const std::vector<Instruction> &insts) {
+  for (const Instruction &inst : insts) {
     genBinary(inst);
   }
 }
 
-void AsmParser::emit(std::ofstream& fout) {
+void AsmParser::emit(std::ofstream &fout) {
   assert(fout.is_open());
   fout << magicNumber;
-  fout.write(reinterpret_cast<const char*>(out.data()), out.size());
+  fout.write(reinterpret_cast<const char *>(out.data()), out.size());
 }
 
-#define END_INSTRUCTION                               \
-    if (lexer.lookahead() == AsmToken::COMMENT) {     \
-       lexer.lex();                                   \
-    }                                                 \
-    assertNextToken(AsmToken::ENDLINE, line, true);   \
-    inst.setAddress(curPos);                          \
-    curPos += inst.length();                          \
-    return inst;
-
+#define END_INSTRUCTION                                                        \
+  if (lexer.lookahead() == AsmToken::COMMENT) {                                \
+    lexer.lex();                                                               \
+  }                                                                            \
+  assertNextToken(AsmToken::ENDLINE, line, true);                              \
+  inst.setAddress(curPos);                                                     \
+  curPos += inst.length();                                                     \
+  return inst;
 
 Instruction AsmParser::parseInstruction() {
   AsmToken instToken = lexer.lex();
@@ -127,8 +124,6 @@ Instruction AsmParser::parseInstruction() {
   inst.line = line;
   inst.isPseduo = false;
   inst.isPendingAddress = false;
-
-  static std::uint64_t pendingAddr = 1;
 
   std::string_view instOpCode = instToken.toStringRef();
   if (instOpCode == "halt"sv) {
@@ -212,7 +207,7 @@ Instruction AsmParser::parseInstruction() {
   }
 
   if (stringViewStartsWith(instOpCode, "j"sv)) {
-    inst.icode = Instruction::icode_j;
+    inst.icode = Instruction::icode_jmp;
     inst.ifun = getCondIFun(instOpCode);
     parseImmediate(inst);
     END_INSTRUCTION;
@@ -244,7 +239,7 @@ Instruction AsmParser::parseInstruction() {
   }
 
   parseError("%d: Unknown instruction '%s'", line,
-        std::string(instOpCode.data(), instOpCode.size()).c_str());
+             std::string(instOpCode.data(), instOpCode.size()).c_str());
 }
 
 Instruction AsmParser::parseDirective() {
@@ -274,8 +269,8 @@ Instruction AsmParser::parseDirective() {
     AsmToken alignToken = lexer.lex();
 
     std::int64_t alignValue = alignToken.getValue();
-    if (alignValue != 1 && alignValue != 2 &&
-        alignValue != 4 && alignValue != 8) {
+    if (alignValue != 1 && alignValue != 2 && alignValue != 4 &&
+        alignValue != 8) {
       parseError("%d: Expected 1, 2, 4 or 8 alignment value");
     }
     inst.value = alignValue;
@@ -300,7 +295,7 @@ Instruction AsmParser::parseDirective() {
   }
 
   parseError("%d: Unknown pseudo instruction '%s'", line,
-        directiveToken.toString().c_str());
+             directiveToken.toString().c_str());
 }
 
 std::string AsmParser::parseLabelName() {
@@ -314,7 +309,7 @@ std::string AsmParser::parseLabelName() {
   return labelStr;
 }
 
-void AsmParser::parseLabel(std::vector<Instruction>& insts) {
+void AsmParser::parseLabel(std::vector<Instruction> &insts) {
   std::vector<std::string> labels;
   labels.push_back(parseLabelName());
 
@@ -355,21 +350,21 @@ void AsmParser::parseLabel(std::vector<Instruction>& insts) {
       break;
     default:
       parseError("%d: Unexpected token '%s'", line,
-        lexer.lex().toString().c_str());
+                 lexer.lex().toString().c_str());
     }
 
     nextKind = lexer.lookahead();
   }
 }
 
-void AsmParser::setLabelsAddress(const std::vector<std::string>& labels,
+void AsmParser::setLabelsAddress(const std::vector<std::string> &labels,
                                  std::uint64_t addr) {
-  for (const std::string& label : labels) {
+  for (const std::string &label : labels) {
     labelTable[label] = addr;
   }
 }
 
-void AsmParser::genBinary(const Instruction& inst) {
+void AsmParser::genBinary(const Instruction &inst) {
   // address: instruction|data\n
   if (inst.isPseduo) {
     handlePseudoInstruction(inst);
@@ -387,13 +382,14 @@ void AsmParser::genBinary(const Instruction& inst) {
   out.push_back('\n');
 }
 
-void AsmParser::handlePseudoInstruction(const Instruction& inst) {
+void AsmParser::handlePseudoInstruction(const Instruction &inst) {
   if (inst.getOpCode() != Instruction::dot_quad) {
     return;
   }
 
   // address: quad_data\n
   genAddress(inst.addr);
+  out.push_back(static_cast<std::uint8_t>(Instruction::dot_quad));
   genValue64(static_cast<std::uint64_t>(inst.value));
   out.push_back('\n');
 }
@@ -402,7 +398,7 @@ void AsmParser::genValue64(std::uint64_t value) {
   InstBuffer buf;
   buf.append(value);
 
-  const std::array<std::uint8_t, kMaxInstLen>& data = buf.data();
+  const std::array<std::uint8_t, kMaxInstLen> &data = buf.data();
   for (std::size_t i = 0; i < buf.size(); ++i) {
     out.push_back(data[i]);
   }
@@ -427,7 +423,7 @@ std::uint64_t AsmParser::nextQuadAlignAddress() {
 }
 
 void AsmParser::assertNextToken(AsmToken::Kind expectedKind, int line,
-                                bool consume, const char* before) {
+                                bool consume, const char *before) {
   AsmToken::Kind nextKind = lexer.lookahead();
   if (consume) {
     lexer.lex();
@@ -436,11 +432,11 @@ void AsmParser::assertNextToken(AsmToken::Kind expectedKind, int line,
   if (nextKind != expectedKind) {
     if (!before) {
       parseError("%d: Expect '%s' token", line,
-            AsmToken::kindToString(expectedKind));
+                 AsmToken::kindToString(expectedKind));
     }
 
     parseError("%d: Expect '%s' token after '%s'", line,
-          AsmToken::kindToString(expectedKind), before);
+               AsmToken::kindToString(expectedKind), before);
   }
 }
 
@@ -471,7 +467,7 @@ std::uint8_t AsmParser::getCondIFun(std::string_view sv) {
   }
 }
 
-void AsmParser::parseRegister(Instruction& inst, bool isLeft) {
+void AsmParser::parseRegister(Instruction &inst, bool isLeft) {
   assertNextToken(AsmToken::REGISTER, inst.line, false);
   AsmToken regToken = lexer.lex();
   Register reg = Register::make(inst.line, regToken.toString());
@@ -483,7 +479,7 @@ void AsmParser::parseRegister(Instruction& inst, bool isLeft) {
   }
 }
 
-void AsmParser::parseImmediate(Instruction& inst) {
+void AsmParser::parseImmediate(Instruction &inst) {
   AsmToken immToken = lexer.lex();
   if (immToken.getKind() == AsmToken::DOLLAR) {
     assertNextToken(AsmToken::NUMBER, inst.line, false, "$");
@@ -499,7 +495,7 @@ void AsmParser::parseImmediate(Instruction& inst) {
   }
 }
 
-void AsmParser::parseMemory(Instruction& inst) {
+void AsmParser::parseMemory(Instruction &inst) {
   inst.value = 0;
   AsmToken::Kind nextKind = lexer.lookahead();
   if (nextKind == AsmToken::NUMBER) {
@@ -513,7 +509,7 @@ void AsmParser::parseMemory(Instruction& inst) {
   assertNextToken(AsmToken::RPAREN, inst.line, true);
 }
 
-void AsmParser::parseRR(Instruction& inst) {
+void AsmParser::parseRR(Instruction &inst) {
   parseRegister(inst, kLeft);
   assertNextToken(AsmToken::COMMA, inst.line, true);
   parseRegister(inst, kRight);
